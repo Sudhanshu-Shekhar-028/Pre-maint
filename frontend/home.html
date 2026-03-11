@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predictive Maintenance | AI & NoSQL</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            light: '#4fadea',
+                            DEFAULT: '#3b82f6',
+                            dark: '#1e40af',
+                        },
+                        darkbase: '#0f172a',
+                        darkcard: '#1e293b'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        .gradient-text {
+            background: linear-gradient(to right, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-bg {
+            background-image: radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.15), transparent 25%),
+                              radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.15), transparent 25%);
+        }
+
+        .nav-link {
+            transition: color 0.2s ease-in-out;
+            position: relative;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 0;
+            background-color: #3b82f6;
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after, .nav-link.active::after {
+            width: 100%;
+        }
+
+        .feature-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .badge {
+            transition: all 0.2s ease;
+        }
+        .badge:hover {
+            background-color: #3b82f6;
+            color: white;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="bg-darkbase text-gray-100 flex flex-col min-h-screen selection:bg-brand-DEFAULT selection:text-white">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-darkbase/80 backdrop-blur-md border-b border-gray-800 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex-shrink-0 flex items-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-microchip text-brand-DEFAULT text-2xl"></i>
+                    <span class="font-bold text-xl tracking-tight text-white">PreMaint<span class="text-brand-DEFAULT">.AI</span></span>
+                </div>
+                
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex space-x-8 items-center">
+                    <a href="home.html" class="nav-link active text-gray-300 hover:text-white font-medium text-sm">Home</a>
+                    <a href="upload.html" class="nav-link text-gray-300 hover:text-white font-medium text-sm">Upload Dataset</a>
+                    <a href="analysis.html" class="nav-link text-gray-300 hover:text-white font-medium text-sm">Data Analysis</a>
+                    <a href="results.html" class="nav-link text-gray-300 hover:text-white font-medium text-sm">Model Results</a>
+                    <a href="resources.html" class="nav-link text-gray-300 hover:text-white font-medium text-sm">Resources</a>
+                </div>
+
+                <!-- Mobile menu button -->
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-btn" class="text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand-DEFAULT p-2 rounded-md">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-darkcard border-b border-gray-800 pb-4 pt-2 shadow-xl absolute w-full">
+            <div class="px-2 space-y-1">
+                <a href="home.html" class="block px-3 py-2 rounded-md text-base font-medium text-white bg-brand-DEFAULT/10 border-l-4 border-brand-DEFAULT">Home</a>
+                <a href="upload.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800 hover:border-l-4 hover:border-gray-500 transition-all">Upload Dataset</a>
+                <a href="analysis.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800 hover:border-l-4 hover:border-gray-500 transition-all">Data Analysis</a>
+                <a href="results.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800 hover:border-l-4 hover:border-gray-500 transition-all">Model Results</a>
+                <a href="resources.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800 hover:border-l-4 hover:border-gray-500 transition-all">Resources</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow">
+        <!-- Hero Section -->
+        <section class="relative pt-24 pb-32 overflow-hidden hero-bg">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-DEFAULT/10 border border-brand-DEFAULT/20 text-brand-light text-sm font-medium mb-8">
+                    <span class="flex h-2 w-2 rounded-full bg-brand-DEFAULT"></span>
+                    NoSQL meets Machine Learning
+                </div>
+                
+                <h1 class="text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight mb-6 text-white leading-tight">
+                    Predictive Maintenance <br/>
+                    <span class="gradient-text">Made Intelligent.</span>
+                </h1>
+                
+                <p class="mt-4 max-w-2xl mx-auto text-xl text-gray-400 mb-10 leading-relaxed">
+                    Identify industrial machine failures before they happen. An end-to-end pipeline leveraging massive MongoDB datastores and state-of-the-art Random Forest classifications.
+                </p>
+                
+                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                    <a href="upload.html" class="w-full sm:w-auto px-8 py-3.5 border border-transparent text-base font-medium rounded-lg text-white bg-brand-DEFAULT hover:bg-brand-dark shadow-lg shadow-brand-DEFAULT/30 transition-all duration-300 transform hover:-translate-y-1">
+                        <i class="fa-solid fa-cloud-arrow-up mr-2"></i> Upload Dataset
+                    </a>
+                    <a href="analysis.html" class="w-full sm:w-auto px-8 py-3.5 border border-gray-600 text-base font-medium rounded-lg text-gray-200 bg-transparent hover:bg-gray-800 hover:border-gray-400 transition-all duration-300">
+                        <i class="fa-solid fa-chart-pie mr-2"></i> View Analysis
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Background Decoration Vectors -->
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-brand-DEFAULT/5 rounded-full blur-3xl -z-10"></div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="py-20 bg-darkbase border-t border-gray-800">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl font-bold text-white mb-4">Pipeline Capabilities</h2>
+                    <p class="text-gray-400 max-w-2xl mx-auto">A fully integrated environment from raw sensor metrics to actionable maintenance predictions.</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Card 1 -->
+                    <div class="feature-card bg-darkcard border border-gray-800 rounded-2xl p-8 relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-bl-[100px] -z-10 transition-colors group-hover:bg-blue-500/10"></div>
+                        <div class="w-14 h-14 rounded-xl bg-blue-500/10 flex items-center justify-center mb-6 text-blue-400 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-database text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-3">Dataset Upload</h3>
+                        <p class="text-gray-400 leading-relaxed text-sm">
+                            Upload industrial sensor datasets effortlessly. Data is securely ingested and persistently stored in a local MongoDB collection for high-performance reading.
+                        </p>
+                    </div>
+
+                    <!-- Card 2 -->
+                    <div class="feature-card bg-darkcard border border-gray-800 rounded-2xl p-8 relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-bl-[100px] -z-10 transition-colors group-hover:bg-purple-500/10"></div>
+                        <div class="w-14 h-14 rounded-xl bg-purple-500/10 flex items-center justify-center mb-6 text-purple-400 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-chart-column text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-3">Data Analysis</h3>
+                        <p class="text-gray-400 leading-relaxed text-sm">
+                            Visualize sensor data dynamically. Instantly generate summary statistics, correlation matrices, and distribution breakdowns prior to ML modeling.
+                        </p>
+                    </div>
+
+                    <!-- Card 3 -->
+                    <div class="feature-card bg-darkcard border border-gray-800 rounded-2xl p-8 relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-bl-[100px] -z-10 transition-colors group-hover:bg-emerald-500/10"></div>
+                        <div class="w-14 h-14 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-6 text-emerald-400 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-network-wired text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-3">Machine Learning</h3>
+                        <p class="text-gray-400 leading-relaxed text-sm">
+                            Train and evaluate Random Forest and Support Vector Machine classifiers automatically. Review precision, recall, and detect overfitting natively.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ML Performance Dashboard & Chart -->
+        <section class="py-20 bg-darkbase border-t border-gray-800">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-white mb-4">Model Performance Overview</h2>
+                    <p class="text-gray-400 max-w-2xl mx-auto">Evaluating the classification accuracy, precision, and recall of our predictive models.</p>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    
+                    <!-- Metrics Dashboard (Left Area) -->
+                    <div class="lg:col-span-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        
+                        <!-- RF Accuracy Card -->
+                        <div class="bg-darkcard border border-gray-800 rounded-xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
+                            <div class="absolute -right-4 -top-4 w-16 h-16 bg-blue-500/10 rounded-full group-hover:scale-150 transition-transform"></div>
+                            <i class="fa-solid fa-tree text-blue-400 text-xl mb-4 block"></i>
+                            <h4 class="text-gray-400 text-sm font-medium">Random Forest</h4>
+                            <div class="mt-1 flex items-baseline gap-2">
+                                <span class="text-3xl font-bold text-white">98.2%</span>
+                                <span class="text-xs text-emerald-400 font-medium">+ Acc</span>
+                            </div>
+                        </div>
+
+                        <!-- SVM Accuracy Card -->
+                        <div class="bg-darkcard border border-gray-800 rounded-xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
+                            <div class="absolute -right-4 -top-4 w-16 h-16 bg-orange-500/10 rounded-full group-hover:scale-150 transition-transform"></div>
+                            <i class="fa-solid fa-wave-square text-orange-400 text-xl mb-4 block"></i>
+                            <h4 class="text-gray-400 text-sm font-medium">SVM (RBF)</h4>
+                            <div class="mt-1 flex items-baseline gap-2">
+                                <span class="text-3xl font-bold text-white">96.5%</span>
+                                <span class="text-xs text-emerald-400 font-medium">+ Acc</span>
+                            </div>
+                        </div>
+
+                        <!-- Precision Card -->
+                        <div class="bg-darkcard border border-gray-800 rounded-xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
+                            <div class="absolute -right-4 -top-4 w-16 h-16 bg-purple-500/10 rounded-full group-hover:scale-150 transition-transform"></div>
+                            <i class="fa-solid fa-bullseye text-purple-400 text-xl mb-4 block"></i>
+                            <h4 class="text-gray-400 text-sm font-medium">Peak Precision</h4>
+                            <div class="mt-1 flex items-baseline gap-2">
+                                <span class="text-3xl font-bold text-white">94.1%</span>
+                                <span class="text-xs text-gray-500 font-medium">Average</span>
+                            </div>
+                        </div>
+
+                        <!-- Recall Card -->
+                        <div class="bg-darkcard border border-gray-800 rounded-xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
+                            <div class="absolute -right-4 -top-4 w-16 h-16 bg-emerald-500/10 rounded-full group-hover:scale-150 transition-transform"></div>
+                            <i class="fa-solid fa-rotate-left text-emerald-400 text-xl mb-4 block"></i>
+                            <h4 class="text-gray-400 text-sm font-medium">Peak Recall</h4>
+                            <div class="mt-1 flex items-baseline gap-2">
+                                <span class="text-3xl font-bold text-white">91.8%</span>
+                                <span class="text-xs text-gray-500 font-medium">Average</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ChartJS Comparison (Right Area) -->
+                    <div class="lg:col-span-7 bg-darkcard border border-gray-800 rounded-xl p-6 shadow-sm flex flex-col justify-center">
+                        <h3 class="text-lg font-bold text-white mb-6 pl-2 border-l-4 border-brand-DEFAULT">Algorithm Comparison</h3>
+                        <div class="relative h-64 w-full">
+                            <canvas id="comparisonChart"></canvas>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </section>
+
+        <!-- Feature Correlation Heatmap -->
+        <section class="py-20 bg-darkbase border-t border-gray-800">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-white mb-4">Feature Correlation Analysis</h2>
+                    <p class="text-gray-400 max-w-2xl mx-auto">Discovering relationships and collinearity between industrial machine sensor features.</p>
+                </div>
+                
+                <div class="bg-darkcard border border-gray-800 rounded-2xl shadow-xl overflow-hidden p-6 sm:p-10 flex justify-center">
+                    <img src="../static/plots/correlation_heatmap.png" alt="Feature Correlation Heatmap" class="max-w-full h-auto rounded-lg shadow-lg border border-gray-700 hover:scale-[1.02] transition-transform duration-500">
+                </div>
+            </div>
+        </section>
+
+        <!-- System Architecture Section -->
+        <section class="py-24 bg-darkcard border-y border-gray-800 relative">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl font-bold text-white mb-4">System Architecture</h2>
+                    <p class="text-gray-400 max-w-2xl mx-auto">A seamless flow of data utilizing modern web infrastructure.</p>
+                </div>
+
+                <div class="flex flex-col lg:flex-row items-center justify-between gap-6 relative px-4">
+                    
+                    <!-- Line connecting everything on Desktop -->
+                    <div class="hidden lg:block absolute top-1/2 left-10 right-10 h-1 bg-gray-800 -translate-y-1/2 z-0"></div>
+
+                    <!-- Block 1 -->
+                    <div class="flex flex-col items-center relative z-10 w-40">
+                        <div class="w-20 h-20 rounded-2xl bg-darkbase border border-gray-700 flex items-center justify-center mb-4 shadow-lg">
+                            <i class="fa-solid fa-user text-3xl text-gray-300"></i>
+                        </div>
+                        <span class="font-medium text-gray-200">User</span>
+                    </div>
+
+                    <div class="lg:hidden h-8 w-1 bg-gray-700 rounded-full my-2"></div>
+
+                    <!-- Block 2 -->
+                    <div class="flex flex-col items-center relative z-10 w-40">
+                        <div class="w-20 h-20 rounded-2xl bg-brand-DEFAULT/20 border border-brand-DEFAULT/50 flex items-center justify-center mb-4 shadow-lg shadow-brand-DEFAULT/10">
+                            <i class="fa-solid fa-globe text-3xl text-brand-DEFAULT"></i>
+                        </div>
+                        <span class="font-medium text-gray-200">Website UI</span>
+                    </div>
+
+                    <div class="lg:hidden h-8 w-1 bg-gray-700 rounded-full my-2"></div>
+
+                    <!-- Block 3 -->
+                    <div class="flex flex-col items-center relative z-10 w-40">
+                        <div class="w-20 h-20 rounded-2xl bg-emerald-500/20 border border-emerald-500/50 flex items-center justify-center mb-4 shadow-lg shadow-emerald-500/10">
+                            <i class="fa-brands fa-python text-3xl text-emerald-500"></i>
+                        </div>
+                        <span class="font-medium text-gray-200">Flask Backend</span>
+                    </div>
+
+                    <div class="lg:hidden h-8 w-1 bg-gray-700 rounded-full my-2"></div>
+
+                    <!-- Block 4 -->
+                    <div class="flex flex-col items-center relative z-10 w-40">
+                        <div class="w-20 h-20 rounded-2xl bg-green-600/20 border border-green-600/50 flex items-center justify-center mb-4 shadow-lg shadow-green-600/10">
+                            <i class="fa-solid fa-leaf text-3xl text-green-500"></i>
+                        </div>
+                        <span class="font-medium text-gray-200">MongoDB</span>
+                    </div>
+
+                    <div class="lg:hidden h-8 w-1 bg-gray-700 rounded-full my-2"></div>
+
+                    <!-- Block 5 -->
+                    <div class="flex flex-col items-center relative z-10 w-40">
+                        <div class="w-20 h-20 rounded-2xl bg-purple-500/20 border border-purple-500/50 flex items-center justify-center mb-4 shadow-lg shadow-purple-500/10">
+                            <i class="fa-solid fa-brain text-3xl text-purple-400"></i>
+                        </div>
+                        <span class="font-medium text-gray-200">ML Models</span>
+                    </div>
+
+                    <div class="lg:hidden h-8 w-1 bg-gray-700 rounded-full my-2"></div>
+
+                    <!-- Block 6 -->
+                    <div class="flex flex-col items-center relative z-10 w-40">
+                        <div class="w-20 h-20 rounded-2xl bg-amber-500/20 border border-amber-500/50 flex items-center justify-center mb-4 shadow-lg shadow-amber-500/10">
+                            <i class="fa-solid fa-chart-line text-3xl text-amber-500"></i>
+                        </div>
+                        <span class="font-medium text-gray-200">Predictions</span>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Tech Stack Section -->
+        <section class="py-20 bg-darkbase">
+            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="text-2xl font-bold text-white mb-10">Powered by the best technologies</h2>
+                
+                <div class="flex flex-wrap justify-center gap-4">
+                    <span class="badge px-5 py-2.5 rounded-full border border-gray-700 bg-darkcard text-gray-300 flex items-center gap-2 cursor-pointer shadow-sm">
+                        <i class="fa-brands fa-python text-xl text-[#3776AB]"></i> Python
+                    </span>
+                    <span class="badge px-5 py-2.5 rounded-full border border-gray-700 bg-darkcard text-gray-300 flex items-center gap-2 cursor-pointer shadow-sm">
+                        <i class="fa-solid fa-leaf text-xl text-[#47A248]"></i> MongoDB
+                    </span>
+                    <span class="badge px-5 py-2.5 rounded-full border border-gray-700 bg-darkcard text-gray-300 flex items-center gap-2 cursor-pointer shadow-sm">
+                        <i class="fa-solid fa-pepper-hot text-xl text-black"></i> Flask
+                    </span>
+                    <span class="badge px-5 py-2.5 rounded-full border border-gray-700 bg-darkcard text-gray-300 flex items-center gap-2 cursor-pointer shadow-sm">
+                        <i class="fa-solid fa-table text-xl text-[#150458]"></i> Pandas
+                    </span>
+                    <span class="badge px-5 py-2.5 rounded-full border border-gray-700 bg-darkcard text-gray-300 flex items-center gap-2 cursor-pointer shadow-sm">
+                        <i class="fa-solid fa-robot text-xl text-[#F7931E]"></i> Scikit-learn
+                    </span>
+                    <span class="badge px-5 py-2.5 rounded-full border border-gray-700 bg-darkcard text-gray-300 flex items-center gap-2 cursor-pointer shadow-sm">
+                        <svg class="w-5 h-5 text-[#38B2AC]" viewBox="0 0 24 24" fill="currentColor"><path d="M12.001,4.8c-3.2,0-5.2,1.6-6,4.8c1.2-1.6,2.6-2.2,4.2-1.8c0.913,0.228,1.565,0.89,2.288,1.624 C13.666,10.618,15.027,12,18.001,12c3.2,0,5.2-1.6,6-4.8c-1.2,1.6-2.6,2.2-4.2,1.8c-0.913-0.228-1.565-0.89-2.288-1.624 C16.337,6.182,14.976,4.8,12.001,4.8z M6.001,12c-3.2,0-5.2,1.6-6,4.8c1.2-1.6,2.6-2.2,4.2-1.8c0.913,0.228,1.565,0.89,2.288,1.624 c1.177,1.194,2.538,2.576,5.512,2.576c3.2,0,5.2-1.6,6-4.8c-1.2,1.6-2.6,2.2-4.2,1.8c-0.913-0.228-1.565-0.89-2.288-1.624 C10.337,13.382,8.976,12,6.001,12z"/></svg> Tailwind CSS
+                    </span>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-black border-t border-gray-900 pt-12 pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-microchip text-brand-DEFAULT text-xl"></i>
+                    <span class="font-bold tracking-tight text-white">PreMaint<span class="text-brand-DEFAULT">.AI</span></span>
+                </div>
+                
+                <div class="text-sm text-gray-500 text-center md:text-left">
+                    Predictive Maintenance using NoSQL and Machine Learning.
+                </div>
+                
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-500 hover:text-white transition-colors">
+                        <span class="sr-only">GitHub</span>
+                        <i class="fa-brands fa-github text-xl"></i>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="mt-8 border-t border-gray-900 pt-8 flex text-center justify-center">
+                <p class="text-sm text-gray-600">
+                    &copy; 2026 Data Mining Project. All rights reserved.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // Mobile menu toggle
+        const btn = document.getElementById('mobile-menu-btn');
+        const menu = document.getElementById('mobile-menu');
+
+        btn.addEventListener('click', () => {
+            menu.classList.toggle('hidden');
+        });
+
+        // Chart.js initialization for Algorithm Comparison
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('comparisonChart').getContext('2d');
+            
+            Chart.defaults.color = '#94a3b8';
+            Chart.defaults.font.family = 'Inter';
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Accuracy', 'Precision', 'Recall'],
+                    datasets: [
+                        {
+                            label: 'Random Forest',
+                            data: [98.2, 94.1, 91.8],
+                            backgroundColor: 'rgba(59, 130, 246, 0.8)', // blue-500
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            borderWidth: 1,
+                            borderRadius: 4
+                        },
+                        {
+                            label: 'SVM (RBF)',
+                            data: [96.5, 92.4, 89.1],
+                            backgroundColor: 'rgba(249, 115, 22, 0.8)', // orange-500
+                            borderColor: 'rgba(249, 115, 22, 1)',
+                            borderWidth: 1,
+                            borderRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)', // darkbase
+                            titleColor: '#f1f5f9',
+                            bodyColor: '#cbd5e1',
+                            borderColor: '#334155',
+                            borderWidth: 1,
+                            padding: 12,
+                            boxPadding: 6
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 80,
+                            max: 100,
+                            grid: {
+                                color: 'rgba(51, 65, 85, 0.5)', // gray-700
+                                drawBorder: false
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

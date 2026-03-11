@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Analysis | PreMaint.AI</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            light: '#4fadea',
+                            DEFAULT: '#3b82f6',
+                            dark: '#1e40af',
+                        },
+                        darkbase: '#0f172a',
+                        darkcard: '#1e293b'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-text { background: linear-gradient(to right, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .nav-link { transition: color 0.2s ease-in-out; position: relative; }
+        .nav-link::after { content: ''; position: absolute; width: 0; height: 2px; bottom: -4px; left: 0; background-color: #3b82f6; transition: width 0.3s ease; }
+        .nav-link:hover::after, .nav-link.active::after { width: 100%; }
+        
+        .stat-card { transition: transform 0.2s ease; }
+        .stat-card:hover { transform: translateY(-4px); }
+        
+        /* Spinner */
+        .loader {
+            border: 4px solid rgba(59, 130, 246, 0.2);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border-left-color: #3b82f6;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-darkbase text-gray-100 flex flex-col min-h-screen selection:bg-brand-DEFAULT selection:text-white">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-darkbase/80 backdrop-blur-md border-b border-gray-800 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex-shrink-0 flex items-center gap-2 cursor-pointer" onclick="window.location.href='home.html'">
+                    <i class="fa-solid fa-microchip text-brand-DEFAULT text-2xl"></i>
+                    <span class="font-bold text-xl tracking-tight text-white">PreMaint<span class="text-brand-DEFAULT">.AI</span></span>
+                </div>
+                
+                <div class="hidden md:flex space-x-8 items-center">
+                    <a href="home.html" class="nav-link text-gray-300 hover:text-white font-medium text-sm">Home</a>
+                    <a href="upload.html" class="nav-link text-gray-300 hover:text-white font-medium text-sm">Upload Dataset</a>
+                    <a href="analysis.html" class="nav-link active text-gray-300 hover:text-white font-medium text-sm">Data Analysis</a>
+                    <a href="results.html" class="nav-link text-gray-300 hover:text-white font-medium text-sm">Model Results</a>
+                    <a href="resources.html" class="nav-link text-gray-300 hover:text-white font-medium text-sm">Resources</a>
+                </div>
+
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-btn" class="text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand-DEFAULT p-2 rounded-md">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="mobile-menu" class="hidden md:hidden bg-darkcard border-b border-gray-800 pb-4 pt-2 shadow-xl absolute w-full">
+            <div class="px-2 space-y-1">
+                <a href="home.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800 transition-all">Home</a>
+                <a href="upload.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800 transition-all">Upload Dataset</a>
+                <a href="analysis.html" class="block px-3 py-2 rounded-md text-base font-medium text-white bg-brand-DEFAULT/10 border-l-4 border-brand-DEFAULT">Data Analysis</a>
+                <a href="results.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800 transition-all">Model Results</a>
+                <a href="resources.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800 hover:border-l-4 hover:border-gray-500 transition-all">Resources</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-3xl font-extrabold text-white">Data Analysis</h1>
+                <p class="text-gray-400 mt-1">Exploratory statistics on the current MongoDB dataset.</p>
+            </div>
+            <button id="refresh-btn" class="px-4 py-2 bg-darkcard border border-gray-700 rounded-lg text-sm text-gray-300 hover:text-white hover:border-gray-500 transition-colors flex items-center gap-2">
+                <i class="fa-solid fa-rotate-right"></i> Refresh Data
+            </button>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading-state" class="flex flex-col items-center justify-center py-20">
+            <div class="loader mb-4"></div>
+            <p class="text-gray-400">Fetching data from MongoDB...</p>
+        </div>
+
+        <!-- Error State -->
+        <div id="error-state" class="hidden bg-red-900/20 border border-red-500/30 rounded-xl p-8 text-center">
+            <i class="fa-solid fa-database text-4xl text-red-400 mb-4 cursor-pointer"></i>
+            <h3 class="text-lg font-medium text-red-400 mb-2">No Dataset Found</h3>
+            <p class="text-gray-400 text-sm mb-6 max-w-md mx-auto" id="error-message">You need to upload a dataset to MongoDB before analysis can be performed.</p>
+            <a href="upload.html" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-brand-DEFAULT hover:bg-brand-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-DEFAULT">
+                Go to Upload Page
+            </a>
+        </div>
+
+        <!-- Dashboard Content -->
+        <div id="dashboard-content" class="hidden space-y-6">
+            
+            <!-- Top Stats Row -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Total Records -->
+                <div class="stat-card bg-darkcard rounded-xl p-6 border border-gray-800 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-400 mb-1">Total Records Ingested</p>
+                        <p class="text-3xl font-bold text-white" id="stat-total-records">-</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500">
+                        <i class="fa-solid fa-layer-group text-xl"></i>
+                    </div>
+                </div>
+
+                <!-- Healthy Machines -->
+                <div class="stat-card bg-darkcard rounded-xl p-6 border border-gray-800 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-400 mb-1">Healthy Operations</p>
+                        <p class="text-3xl font-bold text-emerald-400" id="stat-healthy">-</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+                        <i class="fa-solid fa-check text-xl"></i>
+                    </div>
+                </div>
+
+                <!-- Machine Failures -->
+                <div class="stat-card bg-darkcard rounded-xl p-6 border border-gray-800 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-400 mb-1">Detected Failures</p>
+                        <p class="text-3xl font-bold text-red-400" id="stat-failures">-</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center text-red-500">
+                        <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Imbalance Warning Banner -->
+            <div id="imbalance-banner" class="hidden bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 flex items-center gap-3 text-amber-500 text-sm">
+                <i class="fa-solid fa-circle-info text-lg"></i>
+                <p><strong>Note:</strong> The dataset is highly imbalanced. The machine learning pipeline will automatically apply class-balancing weights to ensure optimal modeling of minority fail events.</p>
+            </div>
+
+            <!-- Summary Table -->
+            <div class="bg-darkcard rounded-xl border border-gray-800 overflow-hidden">
+                <div class="px-6 py-5 border-b border-gray-800 bg-gray-900/50">
+                    <h3 class="text-lg font-medium text-white">Feature Statistical Summary</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-800">
+                        <thead class="bg-gray-800/50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Feature</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Mean</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Std Dev</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Min</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Max</th>
+                            </tr>
+                        </thead>
+                        <tbody id="summary-table-body" class="bg-darkcard divide-y divide-gray-800/50">
+                            <!-- Rows injected by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Actions -->
+            <div class="flex justify-end mt-8">
+                <a href="results.html" class="inline-flex items-center px-6 py-3 border border-transparent rounded-lg shadow-lg text-base font-medium text-white bg-brand-DEFAULT hover:bg-brand-dark transition-colors">
+                    Proceed to Machine Learning <i class="fa-solid fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script>
+        // Mobile Menu
+        document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        });
+
+        const fetchData = async () => {
+            const loadingState = document.getElementById('loading-state');
+            const errorState = document.getElementById('error-state');
+            const dashboardContent = document.getElementById('dashboard-content');
+            
+            // Reset UI
+            loadingState.classList.remove('hidden');
+            errorState.classList.add('hidden');
+            dashboardContent.classList.add('hidden');
+
+            try {
+                const response = await fetch('http://localhost:5000/run_analysis');
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Populate Dashboard
+                    document.getElementById('stat-total-records').innerText = data.total_records.toLocaleString();
+                    
+                    const healthyCount = data.target_distribution['0'] || 0;
+                    const failureCount = data.target_distribution['1'] || 0;
+                    
+                    document.getElementById('stat-healthy').innerText = healthyCount.toLocaleString();
+                    document.getElementById('stat-failures').innerText = failureCount.toLocaleString();
+
+                    // Show imbalance note if ratio is highly skewed
+                    if(healthyCount > (failureCount * 10)) {
+                        document.getElementById('imbalance-banner').classList.remove('hidden');
+                    }
+
+                    // Build table
+                    const tbody = document.getElementById('summary-table-body');
+                    tbody.innerHTML = '';
+                    
+                    const stats = data.summary_statistics;
+                    // Expected keys from describe(): 'mean', 'std', 'min', 'max'
+                    
+                    // Filter out meaningless IDs and the target
+                    const excludedFields = ['UDI', 'Machine_failure', 'Machine failure', 'TWF', 'HDF', 'PWF', 'OSF', 'RNF'];
+                    
+                    // The dict is { statType: { feature1: val, feature2: val } }
+                    // We need to invert it to loop through features easily
+                    if(stats.mean) {
+                        const features = Object.keys(stats.mean);
+                        features.forEach(feature => {
+                            if (!excludedFields.includes(feature) && !feature.toLowerCase().includes('id')) {
+                                const row = `
+                                    <tr class="hover:bg-gray-800/20 transition-colors">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300">${feature}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">${Number(stats.mean[feature]).toFixed(4)}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">${Number(stats.std[feature]).toFixed(4)}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">${Number(stats.min[feature]).toFixed(2)}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">${Number(stats.max[feature]).toFixed(2)}</td>
+                                    </tr>
+                                `;
+                                tbody.innerHTML += row;
+                            }
+                        });
+                    }
+                    
+                    // Switch views
+                    loadingState.classList.add('hidden');
+                    dashboardContent.classList.remove('hidden');
+                    
+                } else {
+                    document.getElementById('error-message').textContent = data.error || "Failed to load dataset metrics.";
+                    loadingState.classList.add('hidden');
+                    errorState.classList.remove('hidden');
+                }
+            } catch (error) {
+                document.getElementById('error-message').textContent = "Could not connect to the backend server. Make sure the Flask App is running on port 5000.";
+                loadingState.classList.add('hidden');
+                errorState.classList.remove('hidden');
+            }
+        };
+
+        // Load data on page load
+        document.addEventListener('DOMContentLoaded', fetchData);
+        
+        // Refresh button
+        document.getElementById('refresh-btn').addEventListener('click', fetchData);
+    </script>
+</body>
+</html>

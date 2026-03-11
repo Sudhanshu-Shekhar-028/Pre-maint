@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Dataset | PreMaint.AI</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            light: '#4fadea',
+                            DEFAULT: '#3b82f6',
+                            dark: '#1e40af',
+                        },
+                        darkbase: '#0f172a',
+                        darkcard: '#1e293b'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-text { background: linear-gradient(to right, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .nav-link { transition: color 0.2s ease-in-out; position: relative; }
+        .nav-link::after { content: ''; position: absolute; width: 0; height: 2px; bottom: -4px; left: 0; background-color: #3b82f6; transition: width 0.3s ease; }
+        .nav-link:hover::after, .nav-link.active::after { width: 100%; }
+        
+        /* Drag and Drop styles */
+        .dropzone {
+            transition: all 0.3s ease;
+            border-style: dashed;
+        }
+        .dropzone.dragover {
+            border-color: #3b82f6;
+            background-color: rgba(59, 130, 246, 0.05);
+            transform: scale(1.01);
+        }
+    </style>
+</head>
+<body class="bg-darkbase text-gray-100 flex flex-col min-h-screen selection:bg-brand-DEFAULT selection:text-white">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-darkbase/80 backdrop-blur-md border-b border-gray-800 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex-shrink-0 flex items-center gap-2 cursor-pointer" onclick="window.location.href='home.html'">
+                    <i class="fa-solid fa-microchip text-brand-DEFAULT text-2xl"></i>
+                    <span class="font-bold text-xl tracking-tight text-white">PreMaint<span class="text-brand-DEFAULT">.AI</span></span>
+                </div>
+                
+                <div class="hidden md:flex space-x-8 items-center">
+                    <a href="home.html" class="nav-link text-gray-300 hover:text-white font-medium text-sm">Home</a>
+                    <a href="upload.html" class="nav-link active text-gray-300 hover:text-white font-medium text-sm">Upload Dataset</a>
+                    <a href="analysis.html" class="nav-link text-gray-300 hover:text-white font-medium text-sm">Data Analysis</a>
+                    <a href="results.html" class="nav-link text-gray-300 hover:text-white font-medium text-sm">Model Results</a>
+                    <a href="resources.html" class="nav-link text-gray-300 hover:text-white font-medium text-sm">Resources</a>
+                </div>
+
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-btn" class="text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand-DEFAULT p-2 rounded-md">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="mobile-menu" class="hidden md:hidden bg-darkcard border-b border-gray-800 pb-4 pt-2 shadow-xl absolute w-full">
+            <div class="px-2 space-y-1">
+                <a href="home.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800 transition-all">Home</a>
+                <a href="upload.html" class="block px-3 py-2 rounded-md text-base font-medium text-white bg-brand-DEFAULT/10 border-l-4 border-brand-DEFAULT">Upload Dataset</a>
+                <a href="analysis.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800 hover:border-l-4 hover:border-gray-500 transition-all">Data Analysis</a>
+                <a href="results.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800 hover:border-l-4 hover:border-gray-500 transition-all">Model Results</a>
+                <a href="resources.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800 hover:border-l-4 hover:border-gray-500 transition-all">Resources</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-2xl w-full">
+            
+            <div class="text-center mb-10">
+                <i class="fa-solid fa-cloud-arrow-up text-5xl text-brand-DEFAULT mb-4 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]"></i>
+                <h2 class="text-3xl font-extrabold text-white sm:text-4xl">Ingest Sensor Data</h2>
+                <p class="mt-3 text-lg text-gray-400">Upload your target industrial CSV dataset. It will be seamlessly persisted into MongoDB for model training.</p>
+            </div>
+
+            <!-- Upload Card -->
+            <div class="bg-darkcard border border-gray-800 rounded-2xl shadow-2xl overflow-hidden relative">
+                <!-- Decorative top gradient -->
+                <div class="absolute top-0 w-full h-1 bg-gradient-to-r from-brand-DEFAULT to-purple-500"></div>
+                
+                <div class="p-8">
+                    <!-- API Response Alert -->
+                    <div id="alert-box" class="hidden mb-6 rounded-lg p-4 border" role="alert">
+                        <div class="flex">
+                            <i id="alert-icon" class="fa-solid mt-0.5 mr-3"></i>
+                            <div>
+                                <h3 id="alert-title" class="text-sm font-medium"></h3>
+                                <div id="alert-message" class="mt-1 text-sm"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form id="upload-form" class="space-y-6">
+                        
+                        <!-- Drag & Drop Zone -->
+                        <div id="dropzone" class="dropzone flex justify-center px-6 pt-10 pb-10 border-2 border-gray-700 rounded-xl bg-darkbase hover:border-brand-DEFAULT hover:bg-brand-DEFAULT/5 cursor-pointer">
+                            <div class="space-y-2 text-center">
+                                <i class="fa-solid fa-file-csv text-4xl text-gray-500 mb-2"></i>
+                                <div class="flex text-sm text-gray-400 justify-center">
+                                    <label for="file-upload" class="relative cursor-pointer rounded-md font-medium text-brand-light hover:text-brand-DEFAULT focus-within:outline-none">
+                                        <span>Upload a file</span>
+                                        <input id="file-upload" name="file" type="file" class="sr-only" accept=".csv">
+                                    </label>
+                                    <p class="pl-1">or drag and drop</p>
+                                </div>
+                                <p class="text-xs text-gray-500">CSV files only up to 10MB</p>
+                                <p id="file-name-display" class="text-sm font-semibold text-brand-DEFAULT hidden mt-4 pt-4 border-t border-gray-800"></p>
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <div>
+                            <button type="submit" id="submit-btn" disabled class="group relative w-full flex justify-center py-3.5 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gray-600 cursor-not-allowed transition-all">
+                                <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+                                    <i id="btn-icon" class="fa-solid fa-upload text-gray-400 group-hover:text-gray-300"></i>
+                                </span>
+                                Upload to MongoDB
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script>
+        // Mobile Menu
+        document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        });
+
+        // UI Elements
+        const form = document.getElementById('upload-form');
+        const fileInput = document.getElementById('file-upload');
+        const dropzone = document.getElementById('dropzone');
+        const fileNameDisplay = document.getElementById('file-name-display');
+        const submitBtn = document.getElementById('submit-btn');
+        const btnIcon = document.getElementById('btn-icon');
+        const alertBox = document.getElementById('alert-box');
+        const alertTitle = document.getElementById('alert-title');
+        const alertMessage = document.getElementById('alert-message');
+        const alertIcon = document.getElementById('alert-icon');
+
+        // Handle File Selection Styling
+        const handleFileSelection = (file) => {
+            if (file && file.name.endsWith('.csv')) {
+                fileNameDisplay.textContent = `Selected: ${file.name}`;
+                fileNameDisplay.classList.remove('hidden');
+                
+                // Enable button
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('bg-gray-600', 'cursor-not-allowed');
+                submitBtn.classList.add('bg-brand-DEFAULT', 'hover:bg-brand-dark', 'shadow-lg', 'shadow-brand-DEFAULT/30');
+                btnIcon.classList.remove('text-gray-400');
+                btnIcon.classList.add('text-brand-light');
+            } else {
+                fileNameDisplay.textContent = 'Invalid file type. Please select a .csv file.';
+                fileNameDisplay.classList.remove('hidden', 'text-brand-DEFAULT');
+                fileNameDisplay.classList.add('text-red-400');
+                
+                // Disable button
+                submitBtn.disabled = true;
+                submitBtn.classList.add('bg-gray-600', 'cursor-not-allowed');
+                submitBtn.classList.remove('bg-brand-DEFAULT', 'hover:bg-brand-dark', 'shadow-lg', 'shadow-brand-DEFAULT/30');
+            }
+        };
+
+        // File Input Change Event
+        fileInput.addEventListener('change', (e) => {
+            handleFileSelection(e.target.files[0]);
+        });
+
+        // Drag & Drop Events
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropzone.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            dropzone.classList.add('dragover');
+        }
+
+        function unhighlight(e) {
+            dropzone.classList.remove('dragover');
+        }
+
+        dropzone.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            let dt = e.dataTransfer;
+            let files = dt.files;
+            
+            // Assign dropped files to input
+            fileInput.files = files;
+            handleFileSelection(files[0]);
+        }
+        
+        // Show Alert Helper
+        const showAlert = (type, title, message) => {
+            alertBox.className = `mb-6 rounded-lg p-4 border ${type === 'success' ? 'bg-emerald-900/30 border-emerald-500/50 text-emerald-400' : 'bg-red-900/30 border-red-500/50 text-red-400'}`;
+            alertIcon.className = `fa-solid ${type === 'success' ? 'fa-circle-check text-emerald-400' : 'fa-circle-exclamation text-red-400'} mt-0.5 mr-3`;
+            alertTitle.textContent = title;
+            alertMessage.textContent = message;
+            alertBox.classList.remove('hidden');
+        };
+
+        // Form Submit Event (AJAX to Flask)
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            // Update UI to loading
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Uploading dataset...';
+            alertBox.classList.add('hidden');
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                // Ensure Flask is running on port 5000
+                const response = await fetch('http://localhost:5000/upload_dataset', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.status === 'success') {
+                    showAlert('success', 'Upload Successful!', `Dataset uploaded successfully. Processed ${data.rows_uploaded.toLocaleString()} rows in ${data.processing_time_seconds}s.`);
+                    fileNameDisplay.classList.add('hidden');
+                    form.reset();
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add('bg-gray-600', 'cursor-not-allowed');
+                    submitBtn.classList.remove('bg-brand-DEFAULT', 'hover:bg-brand-dark', 'shadow-lg');
+                } else {
+                    showAlert('error', 'Upload Failed', data.message || 'An unknown error occurred.');
+                }
+            } catch (error) {
+                showAlert('error', 'Network Error', 'Could not connect to the backend server. Make sure the Flask App is running on port 5000.');
+            } finally {
+                // Reset button text
+                submitBtn.innerHTML = '<span class="absolute left-0 inset-y-0 flex items-center pl-3"><i id="btn-icon" class="fa-solid fa-upload text-gray-400"></i></span>Upload to MongoDB';
+                if(fileInput.files.length > 0) {
+                     submitBtn.disabled = false;
+                     handleFileSelection(fileInput.files[0]);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

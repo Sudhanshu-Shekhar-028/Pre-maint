@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model Results | PreMaint.AI</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            light: '#4fadea',
+                            DEFAULT: '#3b82f6',
+                            dark: '#1e40af',
+                        },
+                        darkbase: '#0f172a',
+                        darkcard: '#1e293b'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-text { background: linear-gradient(to right, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .nav-link { transition: color 0.2s ease-in-out; position: relative; }
+        .nav-link::after { content: ''; position: absolute; width: 0; height: 2px; bottom: -4px; left: 0; background-color: #3b82f6; transition: width 0.3s ease; }
+        .nav-link:hover::after, .nav-link.active::after { width: 100%; }
+        
+        .result-card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .result-card:hover { transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); }
+        
+        /* Spinner */
+        .loader { border: 4px solid rgba(59, 130, 246, 0.2); width: 40px; height: 40px; border-radius: 50%; border-left-color: #3b82f6; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* Progress bars */
+        .progress-bar-bg { background-color: #334155; height: 8px; border-radius: 4px; overflow: hidden; width: 100%; margin-top: 8px;}
+        .progress-bar-fill { height: 100%; border-radius: 4px; transition: width 1s ease-out; }
+        
+        .metric-row { display: flex; justify-content: space-between; align-items: baseline; margin-top: 1rem; }
+        
+        .cm-cell { text-align: center; padding: 12px; border: 1px solid #334155; }
+        .cm-header { font-size: 0.75rem; text-transform: uppercase; color: #94a3b8; font-weight: 500; }
+        .cm-val { font-size: 1.5rem; font-weight: 700; color: #f8fafc; }
+    </style>
+</head>
+<body class="bg-darkbase text-gray-100 flex flex-col min-h-screen selection:bg-brand-DEFAULT selection:text-white">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-darkbase/80 backdrop-blur-md border-b border-gray-800 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex-shrink-0 flex items-center gap-2 cursor-pointer" onclick="window.location.href='home.html'">
+                    <i class="fa-solid fa-microchip text-brand-DEFAULT text-2xl"></i>
+                    <span class="font-bold text-xl tracking-tight text-white">PreMaint<span class="text-brand-DEFAULT">.AI</span></span>
+                </div>
+                
+                <div class="hidden md:flex space-x-8 items-center">
+                    <a href="home.html" class="nav-link text-gray-300 hover:text-white font-medium text-sm">Home</a>
+                    <a href="upload.html" class="nav-link text-gray-300 hover:text-white font-medium text-sm">Upload Dataset</a>
+                    <a href="analysis.html" class="nav-link text-gray-300 hover:text-white font-medium text-sm">Data Analysis</a>
+                    <a href="results.html" class="nav-link active text-gray-300 hover:text-white font-medium text-sm">Model Results</a>
+                    <a href="resources.html" class="nav-link text-gray-300 hover:text-white font-medium text-sm">Resources</a>
+                </div>
+
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-btn" class="text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand-DEFAULT p-2 rounded-md">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="mobile-menu" class="hidden md:hidden bg-darkcard border-b border-gray-800 pb-4 pt-2 shadow-xl absolute w-full">
+            <div class="px-2 space-y-1">
+                <a href="home.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800 transition-all">Home</a>
+                <a href="upload.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800 transition-all">Upload Dataset</a>
+                <a href="analysis.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800 transition-all">Data Analysis</a>
+                <a href="results.html" class="block px-3 py-2 rounded-md text-base font-medium text-white bg-brand-DEFAULT/10 border-l-4 border-brand-DEFAULT">Model Results</a>
+                <a href="resources.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800 hover:border-l-4 hover:border-gray-500 transition-all">Resources</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+            <div>
+                <h1 class="text-3xl font-extrabold text-white">Machine Learning Pipeline</h1>
+                <p class="text-gray-400 mt-1">Train and compare Random Forest and Support Vector Machine performances.</p>
+            </div>
+            
+            <button id="train-btn" class="px-6 py-2.5 bg-brand-DEFAULT hover:bg-brand-dark text-white font-medium rounded-lg shadow-lg hover:shadow-brand-DEFAULT/30 transition-all flex items-center gap-2">
+                <i class="fa-solid fa-play"></i> Initiate Training
+            </button>
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="bg-darkcard border border-gray-800 rounded-xl p-12 text-center shadow-sm">
+            <i class="fa-solid fa-brain text-5xl text-gray-600 mb-4 inline-block"></i>
+            <h3 class="text-xl font-medium text-white mb-2">No active models</h3>
+            <p class="text-gray-400 max-w-md mx-auto mb-6">You have not trained any models yet in this session. Click the 'Initiate Training' button to train models on the current dataset inside MongoDB.</p>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading-state" class="hidden flex flex-col items-center justify-center py-20 bg-darkcard rounded-xl border border-gray-800">
+            <div class="loader mb-6"></div>
+            <h3 class="text-lg font-medium text-white mb-2">Training Models...</h3>
+            <p class="text-gray-400 text-sm max-w-md text-center">Random Forest and Support Vector Machine are currently fitting on the dataset. This may take a few seconds.</p>
+        </div>
+
+        <!-- Error State -->
+        <div id="error-state" class="hidden bg-red-900/20 border border-red-500/30 rounded-xl p-8 text-center mt-6">
+            <i class="fa-solid fa-triangle-exclamation text-4xl text-red-500 mb-4"></i>
+            <h3 class="text-lg font-medium text-red-400 mb-2">Training Failed</h3>
+            <p class="text-gray-400 text-sm" id="error-message">Verify dataset is uploaded to MongoDB and that the Flask API is running.</p>
+        </div>
+
+        <!-- Results Grid -->
+        <div id="results-grid" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            <!-- Random Forest Template -->
+            <div class="result-card bg-darkcard border border-gray-800 rounded-xl overflow-hidden flex flex-col">
+                <div class="p-6 border-b border-gray-800 flex justify-between items-center bg-gray-900/50">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center border border-blue-500/30">
+                            <i class="fa-solid fa-tree text-blue-400"></i>
+                        </div>
+                        <h2 class="text-xl font-bold text-white">Random Forest</h2>
+                    </div>
+                    <!-- Overfit Warning badge -->
+                    <span id="rf-overfit" class="hidden inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100/10 text-red-400 border border-red-400/20">
+                        <i class="fa-solid fa-triangle-exclamation mr-1.5"></i> Overfitting
+                    </span>
+                </div>
+                
+                <div class="p-6 flex-grow flex flex-col space-y-6">
+                    <!-- Metrics -->
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4 border-b border-gray-800 pb-2">Core Metrics (Testing)</h3>
+                        
+                        <div class="metric-row">
+                            <span class="text-sm font-medium text-gray-300">Accuracy</span>
+                            <span class="text-lg font-bold text-white block" id="rf-acc-text">0.0%</span>
+                        </div>
+                        <div class="progress-bar-bg"><div id="rf-acc-bar" class="progress-bar-fill bg-blue-500" style="width: 0%"></div></div>
+
+                        <div class="metric-row">
+                            <span class="text-sm font-medium text-gray-300">Precision</span>
+                            <span class="text-lg font-bold text-white block" id="rf-prec-text">0.0%</span>
+                        </div>
+                        <div class="progress-bar-bg"><div id="rf-prec-bar" class="progress-bar-fill bg-emerald-500" style="width: 0%"></div></div>
+
+                        <div class="metric-row">
+                            <span class="text-sm font-medium text-gray-300">Recall</span>
+                            <span class="text-lg font-bold text-white block" id="rf-rec-text">0.0%</span>
+                        </div>
+                        <div class="progress-bar-bg"><div id="rf-rec-bar" class="progress-bar-fill bg-purple-500" style="width: 0%"></div></div>
+                        
+                        <div class="flex justify-between items-center mt-4 pt-4 border-t border-gray-800/50">
+                            <span class="text-sm text-gray-500">Training Accuracy: <span id="rf-train-acc" class="font-medium text-gray-400">0.0%</span></span>
+                        </div>
+                    </div>
+                    
+                    <!-- Confusion Matrix -->
+                    <div class="mt-auto">
+                        <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3 block">Confusion Matrix</h3>
+                        <div class="grid grid-cols-2 rounded-lg overflow-hidden border border-gray-700">
+                            <div class="cm-cell bg-gray-800/30 border-r border-b">
+                                <div class="cm-header">True Negatives</div>
+                                <div class="cm-val text-brand-light" id="rf-tn">0</div>
+                            </div>
+                            <div class="cm-cell bg-gray-800/30 border-b">
+                                <div class="cm-header">False Positives</div>
+                                <div class="cm-val text-red-400" id="rf-fp">0</div>
+                            </div>
+                            <div class="cm-cell bg-gray-800/30 border-r">
+                                <div class="cm-header">False Negatives</div>
+                                <div class="cm-val text-amber-400" id="rf-fn">0</div>
+                            </div>
+                            <div class="cm-cell bg-gray-800/30">
+                                <div class="cm-header">True Positives</div>
+                                <div class="cm-val text-emerald-400" id="rf-tp">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SVM Template -->
+            <div class="result-card bg-darkcard border border-gray-800 rounded-xl overflow-hidden flex flex-col">
+                <div class="p-6 border-b border-gray-800 flex justify-between items-center bg-gray-900/50">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-orange-500/20 flex items-center justify-center border border-orange-500/30">
+                            <i class="fa-solid fa-wave-square text-orange-400"></i>
+                        </div>
+                        <h2 class="text-xl font-bold text-white">SVM (RBF)</h2>
+                    </div>
+                    <span id="svm-overfit" class="hidden inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100/10 text-red-400 border border-red-400/20">
+                        <i class="fa-solid fa-triangle-exclamation mr-1.5"></i> Overfitting
+                    </span>
+                </div>
+                
+                <div class="p-6 flex-grow flex flex-col space-y-6">
+                    <!-- Metrics -->
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4 border-b border-gray-800 pb-2">Core Metrics (Testing)</h3>
+                        
+                        <div class="metric-row">
+                            <span class="text-sm font-medium text-gray-300">Accuracy</span>
+                            <span class="text-lg font-bold text-white block" id="svm-acc-text">0.0%</span>
+                        </div>
+                        <div class="progress-bar-bg"><div id="svm-acc-bar" class="progress-bar-fill bg-blue-500" style="width: 0%"></div></div>
+
+                        <div class="metric-row">
+                            <span class="text-sm font-medium text-gray-300">Precision</span>
+                            <span class="text-lg font-bold text-white block" id="svm-prec-text">0.0%</span>
+                        </div>
+                        <div class="progress-bar-bg"><div id="svm-prec-bar" class="progress-bar-fill bg-emerald-500" style="width: 0%"></div></div>
+
+                        <div class="metric-row">
+                            <span class="text-sm font-medium text-gray-300">Recall</span>
+                            <span class="text-lg font-bold text-white block" id="svm-rec-text">0.0%</span>
+                        </div>
+                        <div class="progress-bar-bg"><div id="svm-rec-bar" class="progress-bar-fill bg-purple-500" style="width: 0%"></div></div>
+                        
+                        <div class="flex justify-between items-center mt-4 pt-4 border-t border-gray-800/50">
+                            <span class="text-sm text-gray-500">Training Accuracy: <span id="svm-train-acc" class="font-medium text-gray-400">0.0%</span></span>
+                        </div>
+                    </div>
+                    
+                    <!-- Confusion Matrix -->
+                    <div class="mt-auto">
+                        <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3 block">Confusion Matrix</h3>
+                        <div class="grid grid-cols-2 rounded-lg overflow-hidden border border-gray-700">
+                            <div class="cm-cell bg-gray-800/30 border-r border-b">
+                                <div class="cm-header">True Negatives</div>
+                                <div class="cm-val text-brand-light" id="svm-tn">0</div>
+                            </div>
+                            <div class="cm-cell bg-gray-800/30 border-b">
+                                <div class="cm-header">False Positives</div>
+                                <div class="cm-val text-red-400" id="svm-fp">0</div>
+                            </div>
+                            <div class="cm-cell bg-gray-800/30 border-r">
+                                <div class="cm-header">False Negatives</div>
+                                <div class="cm-val text-amber-400" id="svm-fn">0</div>
+                            </div>
+                            <div class="cm-cell bg-gray-800/30">
+                                <div class="cm-header">True Positives</div>
+                                <div class="cm-val text-emerald-400" id="svm-tp">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script>
+        // Mobile Menu
+        document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        });
+
+        const trainBtn = document.getElementById('train-btn');
+        const emptyState = document.getElementById('empty-state');
+        const loadingState = document.getElementById('loading-state');
+        const errorState = document.getElementById('error-state');
+        const resultsGrid = document.getElementById('results-grid');
+
+        // Helper to format DOM variables
+        const populateModelData = (prefix, data) => {
+            // Text values
+            document.getElementById(`${prefix}-acc-text`).innerText = (data.testing_accuracy * 100).toFixed(2) + '%';
+            document.getElementById(`${prefix}-prec-text`).innerText = (data.precision * 100).toFixed(2) + '%';
+            document.getElementById(`${prefix}-rec-text`).innerText = (data.recall * 100).toFixed(2) + '%';
+            document.getElementById(`${prefix}-train-acc`).innerText = (data.training_accuracy * 100).toFixed(2) + '%';
+            
+            // Progress bars
+            setTimeout(() => {
+                document.getElementById(`${prefix}-acc-bar`).style.width = `${data.testing_accuracy * 100}%`;
+                document.getElementById(`${prefix}-prec-bar`).style.width = `${data.precision * 100}%`;
+                document.getElementById(`${prefix}-rec-bar`).style.width = `${data.recall * 100}%`;
+            }, 100);
+
+            // Confusion Matrix
+            // Scikit learn CM returns: [[TN, FP], [FN, TP]]
+            const cm = data.confusion_matrix;
+            document.getElementById(`${prefix}-tn`).innerText = cm[0][0];
+            document.getElementById(`${prefix}-fp`).innerText = cm[0][1];
+            document.getElementById(`${prefix}-fn`).innerText = cm[1][0];
+            document.getElementById(`${prefix}-tp`).innerText = cm[1][1];
+
+            // Overfitting flag
+            const overfitBadge = document.getElementById(`${prefix}-overfit`);
+            if (data.overfitting_detected) {
+                overfitBadge.classList.remove('hidden');
+            } else {
+                overfitBadge.classList.add('hidden');
+            }
+        };
+
+        const renderResults = (data) => {
+            // Switch UI
+            emptyState.classList.add('hidden');
+            loadingState.classList.add('hidden');
+            errorState.classList.add('hidden');
+            resultsGrid.classList.remove('hidden');
+
+            const rf = data.models.random_forest;
+            const svm = data.models.svm;
+            
+            populateModelData('rf', rf);
+            populateModelData('svm', svm);
+        };
+
+        // Attempt to fetch existing results on page load
+        const loadInitialResults = async () => {
+            try {
+                const res = await fetch('http://localhost:5000/results');
+                if (res.ok) {
+                    const data = await res.json();
+                    renderResults(data);
+                } 
+                // If 404, leave it on the empty state (no models trained yet).
+            } catch (e) {
+                console.warn(e);
+            }
+        };
+
+        // Train button action
+        trainBtn.addEventListener('click', async () => {
+            // Disable button
+            trainBtn.disabled = true;
+            trainBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Training...';
+            
+            emptyState.classList.add('hidden');
+            resultsGrid.classList.add('hidden');
+            errorState.classList.add('hidden');
+            loadingState.classList.remove('hidden');
+
+            try {
+                const response = await fetch('http://localhost:5000/train_models', {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    renderResults(data);
+                } else {
+                    document.getElementById('error-message').textContent = data.error || 'Training failed due to server error.';
+                    loadingState.classList.add('hidden');
+                    errorState.classList.remove('hidden');
+                }
+            } catch (error) {
+                document.getElementById('error-message').textContent = "Could not connect to the backend server. Make sure the Flask App is running on port 5000.";
+                loadingState.classList.add('hidden');
+                errorState.classList.remove('hidden');
+            } finally {
+                // Restore button
+                trainBtn.disabled = false;
+                trainBtn.innerHTML = '<i class="fa-solid fa-play"></i> Initiate Training';
+            }
+        });
+
+        // Initialize state
+        document.addEventListener('DOMContentLoaded', loadInitialResults);
+    </script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+nohup: ignoring input
+ * Serving Flask app 'app'
+ * Debug mode: on
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.183.102.11:5000
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 109-328-831
+127.0.0.1 - - [10/Mar/2026 23:58:44] "HEAD /static/research-paper.pdf HTTP/1.1" 200 -
+127.0.0.1 - - [10/Mar/2026 23:59:35] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [10/Mar/2026 23:59:35] "GET /static/plots/correlation_heatmap.png HTTP/1.1" 200 -
+127.0.0.1 - - [10/Mar/2026 23:59:39] "GET /upload.html HTTP/1.1" 200 -
+127.0.0.1 - - [10/Mar/2026 23:59:45] "POST /upload_dataset HTTP/1.1" 200 -
+127.0.0.1 - - [10/Mar/2026 23:59:47] "GET /analysis.html HTTP/1.1" 200 -
+127.0.0.1 - - [10/Mar/2026 23:59:47] "GET /run_analysis HTTP/1.1" 200 -
+127.0.0.1 - - [10/Mar/2026 23:59:49] "GET /results.html HTTP/1.1" 200 -
+127.0.0.1 - - [10/Mar/2026 23:59:49] "[33mGET /results HTTP/1.1[0m" 404 -
+127.0.0.1 - - [10/Mar/2026 23:59:51] "POST /train_models HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 00:00:02] "[36mGET /upload.html HTTP/1.1[0m" 304 -
+127.0.0.1 - - [11/Mar/2026 00:00:37] "POST /upload_dataset HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 00:00:49] "[36mGET /analysis.html HTTP/1.1[0m" 304 -
+127.0.0.1 - - [11/Mar/2026 00:00:49] "GET /run_analysis HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 00:00:51] "[36mGET /results.html HTTP/1.1[0m" 304 -
+127.0.0.1 - - [11/Mar/2026 00:00:51] "GET /results HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 00:00:58] "POST /train_models HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 00:01:17] "[36mGET /analysis.html HTTP/1.1[0m" 304 -
+127.0.0.1 - - [11/Mar/2026 00:01:17] "GET /run_analysis HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 00:01:24] "[36mGET /results.html HTTP/1.1[0m" 304 -
+127.0.0.1 - - [11/Mar/2026 00:01:24] "GET /results HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 00:01:25] "GET /resources.html HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 00:01:25] "GET /static/research-paper.pdf HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 00:01:27] "GET /home.html HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 00:01:27] "[36mGET /static/plots/correlation_heatmap.png HTTP/1.1[0m" 304 -
+127.0.0.1 - - [11/Mar/2026 00:02:52] "[36mGET /upload.html HTTP/1.1[0m" 304 -
+127.0.0.1 - - [11/Mar/2026 00:02:53] "[36mGET /analysis.html HTTP/1.1[0m" 304 -
+127.0.0.1 - - [11/Mar/2026 00:02:53] "GET /run_analysis HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 00:02:55] "[36mGET /results.html HTTP/1.1[0m" 304 -
+127.0.0.1 - - [11/Mar/2026 00:02:55] "GET /results HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 00:03:01] "[36mGET /resources.html HTTP/1.1[0m" 304 -
+127.0.0.1 - - [11/Mar/2026 00:03:01] "[36mGET /static/research-paper.pdf HTTP/1.1[0m" 304 -
+127.0.0.1 - - [11/Mar/2026 00:03:03] "[36mGET /home.html HTTP/1.1[0m" 304 -
+127.0.0.1 - - [11/Mar/2026 00:03:03] "[36mGET /static/plots/correlation_heatmap.png HTTP/1.1[0m" 304 -
