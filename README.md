@@ -81,7 +81,7 @@ Dataset Upload → MongoDB Storage → Data Cleaning → Model Training → Pred
 
 ---
 
-## ⚙️ Setup & Installation
+## Setup & Installation
 
 ```bash
 git clone https://github.com/Sudhanshu-Shekhar-028/Pre-maint.git
