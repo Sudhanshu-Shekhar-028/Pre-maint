@@ -1,383 +1,398 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html class="dark" lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Model Results | PreMaint.AI</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Model Performance Insights - Predictive Maintenance</title>
+    <!-- Tailwind CSS v3 with Plugins -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
-                    colors: {
-                        brand: {
-                            light: '#4fadea',
-                            DEFAULT: '#3b82f6',
-                            dark: '#1e40af',
-                        },
-                        darkbase: '#0f172a',
-                        darkcard: '#1e293b'
-                    },
                     fontFamily: {
-                        sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'dashboard-bg': '#05070a',
+                        'card-bg': 'rgba(23, 23, 23, 0.7)',
+                        'accent-green': '#a3e635',
+                        'accent-blue': '#3b82f6',
                     }
                 }
             }
         }
     </script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts for premium tech feel -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        .gradient-text { background: linear-gradient(to right, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .nav-link { transition: color 0.2s ease-in-out; position: relative; }
-        .nav-link::after { content: ''; position: absolute; width: 0; height: 2px; bottom: -4px; left: 0; background-color: #3b82f6; transition: width 0.3s ease; }
-        .nav-link:hover::after, .nav-link.active::after { width: 100%; }
+    <style data-purpose="background-effects">
+        body {
+            background-color: #05070a;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+        .glow-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 30%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
+                        radial-gradient(circle at 80% 70%, rgba(163, 230, 53, 0.05) 0%, transparent 40%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .noise-bg {
+            position: fixed;
+            inset: 0;
+            opacity: 0.03;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            z-index: 1;
+        }
+    </style>
+    <style data-purpose="card-styles">
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 2rem;
+            transition: all 0.3s ease;
+        }
+        .glass-card:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .gradient-text {
+            background: linear-gradient(to bottom, #ffffff, #9ca3af);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
         
-        .result-card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
-        .result-card:hover { transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); }
-        
-        /* Spinner */
         .loader { border: 4px solid rgba(59, 130, 246, 0.2); width: 40px; height: 40px; border-radius: 50%; border-left-color: #3b82f6; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
-        /* Progress bars */
-        .progress-bar-bg { background-color: #334155; height: 8px; border-radius: 4px; overflow: hidden; width: 100%; margin-top: 8px;}
-        .progress-bar-fill { height: 100%; border-radius: 4px; transition: width 1s ease-out; }
-        
-        .metric-row { display: flex; justify-content: space-between; align-items: baseline; margin-top: 1rem; }
-        
-        .cm-cell { text-align: center; padding: 12px; border: 1px solid #334155; }
-        .cm-header { font-size: 0.75rem; text-transform: uppercase; color: #94a3b8; font-weight: 500; }
-        .cm-val { font-size: 1.5rem; font-weight: 700; color: #f8fafc; }
     </style>
 </head>
-<body class="bg-darkbase text-gray-100 flex flex-col min-h-screen selection:bg-brand-DEFAULT selection:text-white">
+<body class="antialiased font-sans flex flex-col min-h-screen">
+<div class="noise-bg"></div>
+<div class="glow-overlay"></div>
 
-    <!-- Navigation -->
-    <nav class="sticky top-0 z-50 bg-darkbase/80 backdrop-blur-md border-b border-gray-800 transition-all duration-300">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16 items-center">
-                <div class="flex-shrink-0 flex items-center gap-2 cursor-pointer" onclick="window.location.href='home.html'">
-                    <i class="fa-solid fa-microchip text-brand-DEFAULT text-2xl"></i>
-                    <span class="font-bold text-xl tracking-tight text-white">PreMaint<span class="text-brand-DEFAULT">.AI</span></span>
-                </div>
-                
-                <div class="hidden md:flex space-x-8 items-center">
-                    <a href="home.html" class="nav-link text-gray-300 hover:text-white font-medium text-sm">Home</a>
-                    <a href="upload.html" class="nav-link text-gray-300 hover:text-white font-medium text-sm">Upload Dataset</a>
-                    <a href="analysis.html" class="nav-link text-gray-300 hover:text-white font-medium text-sm">Data Analysis</a>
-                    <a href="results.html" class="nav-link active text-gray-300 hover:text-white font-medium text-sm">Model Results</a>
-                    <a href="resources.html" class="nav-link text-gray-300 hover:text-white font-medium text-sm">Resources</a>
-                </div>
-
-                <div class="md:hidden flex items-center">
-                    <button id="mobile-menu-btn" class="text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand-DEFAULT p-2 rounded-md">
-                        <i class="fa-solid fa-bars text-xl"></i>
-                    </button>
-                </div>
-            </div>
+<!-- BEGIN: Navigation -->
+<header class="relative z-20 flex justify-between items-center px-6 md:px-10 py-6">
+    <div class="flex items-center gap-2 cursor-pointer" onclick="window.location.href='home.html'">
+        <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center overflow-hidden">
+            <div class="w-6 h-6 bg-black rounded-full translate-x-1 translate-y-1"></div>
         </div>
-
-        <div id="mobile-menu" class="hidden md:hidden bg-darkcard border-b border-gray-800 pb-4 pt-2 shadow-xl absolute w-full">
-            <div class="px-2 space-y-1">
-                <a href="home.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800 transition-all">Home</a>
-                <a href="upload.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800 transition-all">Upload Dataset</a>
-                <a href="analysis.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800 transition-all">Data Analysis</a>
-                <a href="results.html" class="block px-3 py-2 rounded-md text-base font-medium text-white bg-brand-DEFAULT/10 border-l-4 border-brand-DEFAULT">Model Results</a>
-                <a href="resources.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800 hover:border-l-4 hover:border-gray-500 transition-all">Resources</a>
-            </div>
-        </div>
+        <span class="font-bold text-xl tracking-tight text-white hidden sm:block">PreMaint</span>
+    </div>
+    
+    <nav class="hidden md:flex items-center glass-nav rounded-full px-6 py-2 gap-6 text-sm font-medium text-gray-400">
+        <a href="home.html" class="hover:text-white transition-colors">Home</a>
+        <a href="upload.html" class="hover:text-white transition-colors">Upload Dataset</a>
+        <a href="analysis.html" class="hover:text-white transition-colors">Data Analysis</a>
+        <a href="results.html" class="text-white transition-colors">Model Results</a>
     </nav>
+    
+    <div class="flex items-center gap-4 text-sm">
+        <button class="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+            Create Account
+        </button>
+    </div>
+</header>
+<!-- END: Navigation -->
 
-    <!-- Main Content -->
-    <main class="flex-grow py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+<main class="relative z-10 max-w-7xl w-full mx-auto px-6 py-12 flex-grow flex flex-col items-center">
+    <!-- BEGIN: Header Section -->
+    <header class="text-center mb-12 flex flex-col items-center w-full" data-purpose="header-section">
+        <h1 class="text-5xl md:text-6xl font-bold tracking-tight gradient-text mb-4">
+            Model Performance Insights
+        </h1>
+        <p class="text-gray-400 max-w-2xl mx-auto text-lg mb-8">
+            Performance metrics and algorithm comparison for predictive maintenance models trained on industrial sensor datasets.
+        </p>
+        <button id="train-btn" class="px-8 py-3 bg-accent-blue/10 border border-accent-blue/50 hover:bg-accent-blue/30 text-accent-blue font-medium rounded-full shadow-lg transition-all flex items-center gap-2">
+            <i class="fa-solid fa-play"></i> Initiate Training
+        </button>
+    </header>
+    <!-- END: Header Section -->
+
+    <!-- Empty State -->
+    <div id="empty-state" class="glass-card p-12 text-center w-full max-w-2xl mb-12">
+        <i class="fa-solid fa-brain text-5xl text-gray-600 mb-4 inline-block"></i>
+        <h3 class="text-xl font-medium text-white mb-2">No active models</h3>
+        <p class="text-gray-400 max-w-md mx-auto mb-6">You have not trained any models yet in this session. Click the 'Initiate Training' button to train models on the current dataset inside MongoDB.</p>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading-state" class="hidden flex flex-col items-center justify-center py-20 glass-card w-full max-w-2xl">
+        <div class="loader mb-6"></div>
+        <h3 class="text-lg font-medium text-white mb-2">Training Models...</h3>
+        <p class="text-gray-400 text-sm max-w-md text-center">Random Forest and Support Vector Machine are currently fitting on the dataset. This may take a few seconds.</p>
+    </div>
+
+    <!-- Error State -->
+    <div id="error-state" class="hidden bg-red-900/20 border border-red-500/30 rounded-xl p-8 text-center w-full max-w-2xl mt-6">
+        <i class="fa-solid fa-triangle-exclamation text-4xl text-red-500 mb-4"></i>
+        <h3 class="text-lg font-medium text-red-400 mb-2">Training Failed</h3>
+        <p class="text-gray-400 text-sm" id="error-message">Verify dataset is uploaded to MongoDB and that the Flask API is running.</p>
+    </div>
+
+    <!-- BEGIN: Dashboard Grid -->
+    <div id="results-grid" class="hidden grid grid-cols-12 gap-6 w-full" data-purpose="dashboard-grid">
+        <!-- TOP LEFT: Accuracy Focus (Large) -->
+        <section class="col-span-12 lg:col-span-7 glass-card p-10 flex flex-col justify-between min-h-[400px]">
+            <div class="flex justify-between items-start">
+                <div class="space-y-1">
+                    <h2 class="text-7xl font-bold tracking-tighter" id="rf-acc-text">0.0% <span class="text-accent-green text-2xl align-top ml-1">↗</span></h2>
+                    <p class="text-gray-400 font-medium uppercase tracking-widest text-sm">Random Forest Model Accuracy</p>
+                </div>
+                <!-- Technical Globe Graphic Mockup -->
+                <div class="relative w-48 h-48 opacity-50 overflow-hidden hidden md:block">
+                    <div class="absolute inset-0 border-[1px] border-dashed border-gray-600 rounded-full animate-[spin_20s_linear_infinite]"></div>
+                    <div class="absolute inset-2 border-[1px] border-blue-500/30 rounded-full"></div>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <div class="w-1 h-1 bg-white rounded-full shadow-[0_0_10px_white]"></div>
+                        <div class="absolute top-1/4 right-1/4 w-1.5 h-1.5 bg-blue-400 rounded-full blur-[1px]"></div>
+                        <div class="absolute bottom-1/3 left-1/4 w-1 h-1 bg-white/50 rounded-full"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8">
+                <div class="flex gap-2 mb-6">
+                    <span id="rf-overfit" class="hidden px-3 py-1 bg-red-500/10 border border-red-500/20 rounded-full text-[10px] text-red-400">⚠ OVERFITTING DETECTED</span>
+                    <span class="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] text-gray-400">BEST PERFORMER</span>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Success Metrics</h3>
+                <p class="text-gray-400 leading-relaxed text-sm">
+                    Random Forest achieved the highest classification accuracy in predicting machine failures from sensor data, optimizing precision and recall across the testing set.
+                </p>
+            </div>
+        </section>
+
+        <!-- TOP RIGHT: Algorithm Comparison -->
+        <section class="col-span-12 lg:col-span-5 glass-card p-8 flex flex-col justify-between min-h-[400px]">
+            <h3 class="text-2xl font-bold mb-4">Algorithm Comparison</h3>
+            <div class="relative w-full flex-grow flex items-center justify-center min-h-[250px]">
+                <canvas id="comparisonChart"></canvas>
+            </div>
+            <div class="mt-4">
+                <p class="text-sm text-gray-400 text-center">
+                    Comparative analysis of classification performance metrics.
+                </p>
+            </div>
+        </section>
+
+        <!-- BOTTOM LEFT: SVM Accuracy -->
+        <section class="col-span-12 md:col-span-4 glass-card p-8 flex flex-col justify-between min-h-[240px]">
             <div>
-                <h1 class="text-3xl font-extrabold text-white">Machine Learning Pipeline</h1>
-                <p class="text-gray-400 mt-1">Train and compare Random Forest and Support Vector Machine performances.</p>
+                <div class="w-1 h-6 bg-orange-500 mb-4 rounded-full"></div>
+                <h4 class="text-gray-400 text-sm font-medium">SVM Accuracy</h4>
+                <p class="text-4xl font-bold mt-2" id="svm-acc-text">0.0%</p>
             </div>
-            
-            <button id="train-btn" class="px-6 py-2.5 bg-brand-DEFAULT hover:bg-brand-dark text-white font-medium rounded-lg shadow-lg hover:shadow-brand-DEFAULT/30 transition-all flex items-center gap-2">
-                <i class="fa-solid fa-play"></i> Initiate Training
-            </button>
-        </div>
-
-        <!-- Empty State -->
-        <div id="empty-state" class="bg-darkcard border border-gray-800 rounded-xl p-12 text-center shadow-sm">
-            <i class="fa-solid fa-brain text-5xl text-gray-600 mb-4 inline-block"></i>
-            <h3 class="text-xl font-medium text-white mb-2">No active models</h3>
-            <p class="text-gray-400 max-w-md mx-auto mb-6">You have not trained any models yet in this session. Click the 'Initiate Training' button to train models on the current dataset inside MongoDB.</p>
-        </div>
-
-        <!-- Loading State -->
-        <div id="loading-state" class="hidden flex flex-col items-center justify-center py-20 bg-darkcard rounded-xl border border-gray-800">
-            <div class="loader mb-6"></div>
-            <h3 class="text-lg font-medium text-white mb-2">Training Models...</h3>
-            <p class="text-gray-400 text-sm max-w-md text-center">Random Forest and Support Vector Machine are currently fitting on the dataset. This may take a few seconds.</p>
-        </div>
-
-        <!-- Error State -->
-        <div id="error-state" class="hidden bg-red-900/20 border border-red-500/30 rounded-xl p-8 text-center mt-6">
-            <i class="fa-solid fa-triangle-exclamation text-4xl text-red-500 mb-4"></i>
-            <h3 class="text-lg font-medium text-red-400 mb-2">Training Failed</h3>
-            <p class="text-gray-400 text-sm" id="error-message">Verify dataset is uploaded to MongoDB and that the Flask API is running.</p>
-        </div>
-
-        <!-- Results Grid -->
-        <div id="results-grid" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
-            
-            <!-- Random Forest Template -->
-            <div class="result-card bg-darkcard border border-gray-800 rounded-xl overflow-hidden flex flex-col">
-                <div class="p-6 border-b border-gray-800 flex justify-between items-center bg-gray-900/50">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center border border-blue-500/30">
-                            <i class="fa-solid fa-tree text-blue-400"></i>
-                        </div>
-                        <h2 class="text-xl font-bold text-white">Random Forest</h2>
-                    </div>
-                    <!-- Overfit Warning badge -->
-                    <span id="rf-overfit" class="hidden inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100/10 text-red-400 border border-red-400/20">
-                        <i class="fa-solid fa-triangle-exclamation mr-1.5"></i> Overfitting
-                    </span>
-                </div>
-                
-                <div class="p-6 flex-grow flex flex-col space-y-6">
-                    <!-- Metrics -->
-                    <div>
-                        <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4 border-b border-gray-800 pb-2">Core Metrics (Testing)</h3>
-                        
-                        <div class="metric-row">
-                            <span class="text-sm font-medium text-gray-300">Accuracy</span>
-                            <span class="text-lg font-bold text-white block" id="rf-acc-text">0.0%</span>
-                        </div>
-                        <div class="progress-bar-bg"><div id="rf-acc-bar" class="progress-bar-fill bg-blue-500" style="width: 0%"></div></div>
-
-                        <div class="metric-row">
-                            <span class="text-sm font-medium text-gray-300">Precision</span>
-                            <span class="text-lg font-bold text-white block" id="rf-prec-text">0.0%</span>
-                        </div>
-                        <div class="progress-bar-bg"><div id="rf-prec-bar" class="progress-bar-fill bg-emerald-500" style="width: 0%"></div></div>
-
-                        <div class="metric-row">
-                            <span class="text-sm font-medium text-gray-300">Recall</span>
-                            <span class="text-lg font-bold text-white block" id="rf-rec-text">0.0%</span>
-                        </div>
-                        <div class="progress-bar-bg"><div id="rf-rec-bar" class="progress-bar-fill bg-purple-500" style="width: 0%"></div></div>
-                        
-                        <div class="flex justify-between items-center mt-4 pt-4 border-t border-gray-800/50">
-                            <span class="text-sm text-gray-500">Training Accuracy: <span id="rf-train-acc" class="font-medium text-gray-400">0.0%</span></span>
-                        </div>
-                    </div>
-                    
-                    <!-- Confusion Matrix -->
-                    <div class="mt-auto">
-                        <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3 block">Confusion Matrix</h3>
-                        <div class="grid grid-cols-2 rounded-lg overflow-hidden border border-gray-700">
-                            <div class="cm-cell bg-gray-800/30 border-r border-b">
-                                <div class="cm-header">True Negatives</div>
-                                <div class="cm-val text-brand-light" id="rf-tn">0</div>
-                            </div>
-                            <div class="cm-cell bg-gray-800/30 border-b">
-                                <div class="cm-header">False Positives</div>
-                                <div class="cm-val text-red-400" id="rf-fp">0</div>
-                            </div>
-                            <div class="cm-cell bg-gray-800/30 border-r">
-                                <div class="cm-header">False Negatives</div>
-                                <div class="cm-val text-amber-400" id="rf-fn">0</div>
-                            </div>
-                            <div class="cm-cell bg-gray-800/30">
-                                <div class="cm-header">True Positives</div>
-                                <div class="cm-val text-emerald-400" id="rf-tp">0</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div>
+                <p class="text-xs text-gray-500 leading-relaxed">
+                    Overall testing accuracy achieved by the Support Vector Machine (RBF kernel) classifier.
+                </p>
+                <span id="svm-overfit" class="hidden mt-3 inline-block px-3 py-1 bg-red-500/10 border border-red-500/20 rounded-full text-[10px] text-red-400">⚠ OVERFITTING DETECTED</span>
             </div>
+        </section>
 
-            <!-- SVM Template -->
-            <div class="result-card bg-darkcard border border-gray-800 rounded-xl overflow-hidden flex flex-col">
-                <div class="p-6 border-b border-gray-800 flex justify-between items-center bg-gray-900/50">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-lg bg-orange-500/20 flex items-center justify-center border border-orange-500/30">
-                            <i class="fa-solid fa-wave-square text-orange-400"></i>
-                        </div>
-                        <h2 class="text-xl font-bold text-white">SVM (RBF)</h2>
-                    </div>
-                    <span id="svm-overfit" class="hidden inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100/10 text-red-400 border border-red-400/20">
-                        <i class="fa-solid fa-triangle-exclamation mr-1.5"></i> Overfitting
-                    </span>
-                </div>
-                
-                <div class="p-6 flex-grow flex flex-col space-y-6">
-                    <!-- Metrics -->
-                    <div>
-                        <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4 border-b border-gray-800 pb-2">Core Metrics (Testing)</h3>
-                        
-                        <div class="metric-row">
-                            <span class="text-sm font-medium text-gray-300">Accuracy</span>
-                            <span class="text-lg font-bold text-white block" id="svm-acc-text">0.0%</span>
-                        </div>
-                        <div class="progress-bar-bg"><div id="svm-acc-bar" class="progress-bar-fill bg-blue-500" style="width: 0%"></div></div>
-
-                        <div class="metric-row">
-                            <span class="text-sm font-medium text-gray-300">Precision</span>
-                            <span class="text-lg font-bold text-white block" id="svm-prec-text">0.0%</span>
-                        </div>
-                        <div class="progress-bar-bg"><div id="svm-prec-bar" class="progress-bar-fill bg-emerald-500" style="width: 0%"></div></div>
-
-                        <div class="metric-row">
-                            <span class="text-sm font-medium text-gray-300">Recall</span>
-                            <span class="text-lg font-bold text-white block" id="svm-rec-text">0.0%</span>
-                        </div>
-                        <div class="progress-bar-bg"><div id="svm-rec-bar" class="progress-bar-fill bg-purple-500" style="width: 0%"></div></div>
-                        
-                        <div class="flex justify-between items-center mt-4 pt-4 border-t border-gray-800/50">
-                            <span class="text-sm text-gray-500">Training Accuracy: <span id="svm-train-acc" class="font-medium text-gray-400">0.0%</span></span>
-                        </div>
-                    </div>
-                    
-                    <!-- Confusion Matrix -->
-                    <div class="mt-auto">
-                        <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3 block">Confusion Matrix</h3>
-                        <div class="grid grid-cols-2 rounded-lg overflow-hidden border border-gray-700">
-                            <div class="cm-cell bg-gray-800/30 border-r border-b">
-                                <div class="cm-header">True Negatives</div>
-                                <div class="cm-val text-brand-light" id="svm-tn">0</div>
-                            </div>
-                            <div class="cm-cell bg-gray-800/30 border-b">
-                                <div class="cm-header">False Positives</div>
-                                <div class="cm-val text-red-400" id="svm-fp">0</div>
-                            </div>
-                            <div class="cm-cell bg-gray-800/30 border-r">
-                                <div class="cm-header">False Negatives</div>
-                                <div class="cm-val text-amber-400" id="svm-fn">0</div>
-                            </div>
-                            <div class="cm-cell bg-gray-800/30">
-                                <div class="cm-header">True Positives</div>
-                                <div class="cm-val text-emerald-400" id="svm-tp">0</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <!-- BOTTOM MIDDLE: Precision -->
+        <section class="col-span-12 md:col-span-4 glass-card p-8 flex flex-col justify-between min-h-[240px]">
+            <div>
+                <div class="w-1 h-6 bg-yellow-500 mb-4 rounded-full"></div>
+                <h4 class="text-gray-400 text-sm font-medium">Peak Precision</h4>
+                <p class="text-4xl font-bold mt-2" id="peak-prec-text">0.0%</p>
             </div>
+            <div>
+                <p class="text-xs text-gray-500 leading-relaxed">
+                    Highest precision score representing the ability to correctly identify actual failures without false alarms.
+                </p>
+            </div>
+        </section>
 
-        </div>
-    </main>
+        <!-- BOTTOM RIGHT: Recall -->
+        <section class="col-span-12 md:col-span-4 glass-card p-8 flex flex-col justify-between min-h-[240px]">
+            <div>
+                <div class="w-1 h-6 bg-accent-green mb-4 rounded-full"></div>
+                <h4 class="text-gray-400 text-sm font-medium">Peak Recall</h4>
+                <p class="text-4xl font-bold mt-2" id="peak-rec-text">0.0%</p>
+            </div>
+            <div>
+                <p class="text-xs text-gray-500 leading-relaxed">
+                    Highest recall score representing the model’s ability to detect true machine failure cases correctly.
+                </p>
+            </div>
+        </section>
+    </div>
+    <!-- END: Dashboard Grid -->
+</main>
 
-    <!-- Scripts -->
-    <script>
-        // Mobile Menu
-        document.getElementById('mobile-menu-btn').addEventListener('click', () => {
-            document.getElementById('mobile-menu').classList.toggle('hidden');
-        });
+<script>
+    const trainBtn = document.getElementById('train-btn');
+    const emptyState = document.getElementById('empty-state');
+    const loadingState = document.getElementById('loading-state');
+    const errorState = document.getElementById('error-state');
+    const resultsGrid = document.getElementById('results-grid');
+    
+    let chartInstance = null;
 
-        const trainBtn = document.getElementById('train-btn');
-        const emptyState = document.getElementById('empty-state');
-        const loadingState = document.getElementById('loading-state');
-        const errorState = document.getElementById('error-state');
-        const resultsGrid = document.getElementById('results-grid');
-
-        // Helper to format DOM variables
-        const populateModelData = (prefix, data) => {
-            // Text values
-            document.getElementById(`${prefix}-acc-text`).innerText = (data.testing_accuracy * 100).toFixed(2) + '%';
-            document.getElementById(`${prefix}-prec-text`).innerText = (data.precision * 100).toFixed(2) + '%';
-            document.getElementById(`${prefix}-rec-text`).innerText = (data.recall * 100).toFixed(2) + '%';
-            document.getElementById(`${prefix}-train-acc`).innerText = (data.training_accuracy * 100).toFixed(2) + '%';
-            
-            // Progress bars
-            setTimeout(() => {
-                document.getElementById(`${prefix}-acc-bar`).style.width = `${data.testing_accuracy * 100}%`;
-                document.getElementById(`${prefix}-prec-bar`).style.width = `${data.precision * 100}%`;
-                document.getElementById(`${prefix}-rec-bar`).style.width = `${data.recall * 100}%`;
-            }, 100);
-
-            // Confusion Matrix
-            // Scikit learn CM returns: [[TN, FP], [FN, TP]]
-            const cm = data.confusion_matrix;
-            document.getElementById(`${prefix}-tn`).innerText = cm[0][0];
-            document.getElementById(`${prefix}-fp`).innerText = cm[0][1];
-            document.getElementById(`${prefix}-fn`).innerText = cm[1][0];
-            document.getElementById(`${prefix}-tp`).innerText = cm[1][1];
-
-            // Overfitting flag
-            const overfitBadge = document.getElementById(`${prefix}-overfit`);
-            if (data.overfitting_detected) {
-                overfitBadge.classList.remove('hidden');
-            } else {
-                overfitBadge.classList.add('hidden');
-            }
-        };
-
-        const renderResults = (data) => {
-            // Switch UI
-            emptyState.classList.add('hidden');
-            loadingState.classList.add('hidden');
-            errorState.classList.add('hidden');
-            resultsGrid.classList.remove('hidden');
-
-            const rf = data.models.random_forest;
-            const svm = data.models.svm;
-            
-            populateModelData('rf', rf);
-            populateModelData('svm', svm);
-        };
-
-        // Attempt to fetch existing results on page load
-        const loadInitialResults = async () => {
-            try {
-                const res = await fetch('http://localhost:5000/results');
-                if (res.ok) {
-                    const data = await res.json();
-                    renderResults(data);
-                } 
-                // If 404, leave it on the empty state (no models trained yet).
-            } catch (e) {
-                console.warn(e);
-            }
-        };
-
-        // Train button action
-        trainBtn.addEventListener('click', async () => {
-            // Disable button
-            trainBtn.disabled = true;
-            trainBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Training...';
-            
-            emptyState.classList.add('hidden');
-            resultsGrid.classList.add('hidden');
-            errorState.classList.add('hidden');
-            loadingState.classList.remove('hidden');
-
-            try {
-                const response = await fetch('http://localhost:5000/train_models', {
-                    method: 'POST'
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    renderResults(data);
-                } else {
-                    document.getElementById('error-message').textContent = data.error || 'Training failed due to server error.';
-                    loadingState.classList.add('hidden');
-                    errorState.classList.remove('hidden');
+    const renderChart = (rf, svm) => {
+        const ctx = document.getElementById('comparisonChart').getContext('2d');
+        if (chartInstance) {
+            chartInstance.destroy();
+        }
+        
+        Chart.defaults.color = '#9ca3af';
+        Chart.defaults.font.family = 'Inter';
+        
+        chartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Accuracy', 'Precision', 'Recall'],
+                datasets: [
+                    {
+                        label: 'Random Forest',
+                        data: [(rf.testing_accuracy*100).toFixed(2), (rf.precision*100).toFixed(2), (rf.recall*100).toFixed(2)],
+                        backgroundColor: 'rgba(59, 130, 246, 0.8)', // accent-blue
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    },
+                    {
+                        label: 'SVM (RBF)',
+                        data: [(svm.testing_accuracy*100).toFixed(2), (svm.precision*100).toFixed(2), (svm.recall*100).toFixed(2)],
+                        backgroundColor: 'rgba(249, 115, 22, 0.8)', // orange for contrast
+                        borderColor: 'rgba(249, 115, 22, 1)',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            color: '#e5e7eb',
+                            usePointStyle: true,
+                            font: { family: "'Inter', sans-serif" }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0,0,0,0.8)',
+                        titleColor: '#fff',
+                        bodyColor: '#e2e8f0',
+                        borderColor: 'rgba(255,255,255,0.1)',
+                        borderWidth: 1,
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        min: 80,
+                        max: 100,
+                        grid: {
+                            color: 'rgba(51, 65, 85, 0.3)',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            callback: function(value) { return value + '%'; }
+                        }
+                    },
+                    x: {
+                        grid: { display: false }
+                    }
                 }
-            } catch (error) {
-                document.getElementById('error-message').textContent = "Could not connect to the backend server. Make sure the Flask App is running on port 5000.";
+            }
+        });
+    };
+
+    const renderResults = (data) => {
+        emptyState.classList.add('hidden');
+        loadingState.classList.add('hidden');
+        errorState.classList.add('hidden');
+        resultsGrid.classList.remove('hidden');
+
+        const rf = data.models.random_forest;
+        const svm = data.models.svm;
+        
+        document.getElementById('rf-acc-text').innerHTML = `${(rf.testing_accuracy * 100).toFixed(1)}% <span class="text-accent-green text-2xl align-top ml-1">↗</span>`;
+        document.getElementById('svm-acc-text').innerText = (svm.testing_accuracy * 100).toFixed(1) + '%';
+        
+        const peakPrec = Math.max(rf.precision, svm.precision);
+        const peakRec = Math.max(rf.recall, svm.recall);
+        
+        document.getElementById('peak-prec-text').innerText = (peakPrec * 100).toFixed(1) + '%';
+        document.getElementById('peak-rec-text').innerText = (peakRec * 100).toFixed(1) + '%';
+
+        const rfOverfit = document.getElementById('rf-overfit');
+        if (rf.overfitting_detected) { rfOverfit.classList.remove('hidden'); } else { rfOverfit.classList.add('hidden'); }
+
+        const svmOverfit = document.getElementById('svm-overfit');
+        if (svm.overfitting_detected) { svmOverfit.classList.remove('hidden'); } else { svmOverfit.classList.add('hidden'); }
+
+        renderChart(rf, svm);
+    };
+
+    const loadInitialResults = async () => {
+        try {
+            const res = await fetch('http://localhost:5000/results');
+            if (res.ok) {
+                const data = await res.json();
+                renderResults(data);
+            } 
+        } catch (e) {
+            console.warn(e);
+        }
+    };
+
+    trainBtn.addEventListener('click', async () => {
+        trainBtn.disabled = true;
+        trainBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Training...';
+        
+        emptyState.classList.add('hidden');
+        resultsGrid.classList.add('hidden');
+        errorState.classList.add('hidden');
+        loadingState.classList.remove('hidden');
+
+        try {
+            const response = await fetch('http://localhost:5000/train_models', { method: 'POST' });
+            const data = await response.json();
+            
+            if (response.ok) {
+                renderResults(data);
+            } else {
+                document.getElementById('error-message').textContent = data.error || 'Training failed due to server error.';
                 loadingState.classList.add('hidden');
                 errorState.classList.remove('hidden');
-            } finally {
-                // Restore button
-                trainBtn.disabled = false;
-                trainBtn.innerHTML = '<i class="fa-solid fa-play"></i> Initiate Training';
             }
-        });
+        } catch (error) {
+            document.getElementById('error-message').textContent = "Could not connect to backend server. Make sure Flask API is running.";
+            loadingState.classList.add('hidden');
+            errorState.classList.remove('hidden');
+        } finally {
+            trainBtn.disabled = false;
+            trainBtn.innerHTML = '<i class="fa-solid fa-play"></i> Initiate Training';
+        }
+    });
 
-        // Initialize state
-        document.addEventListener('DOMContentLoaded', loadInitialResults);
-    </script>
+    document.addEventListener('DOMContentLoaded', loadInitialResults);
+</script>
 </body>
 </html>
